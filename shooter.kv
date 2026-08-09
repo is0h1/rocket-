@@ -1,47 +1,176 @@
-<MainScreen>:
-    MDBoxLayout:
-        orientation: 'vertical'
-        padding: '50dp'
-        spacing: '30dp'
-        MDIconButton:
-            icon: "cog"
-            pos_hint: {"right": 1, "top": 1}
-            icon_size: '50dp'
-        # MDLabel:
-        #     text: "SHUTER"
-        #     halign: 'center'
-        #     font_size: '60sp'
-        Image:
-            source: 'images/rocket.png'
-            size_hint_y: 0.7
-            allow_stretch: True
-        MDRectangleFlatButton:
-            text: "PLAY"
-            font_size: '60sp'
-            pos_hint: {'center_x': 0.5,'center_y': 0.5}
-            # theme_text_color: "Custom"
-            # text_color: "white"
-            # line_color: "red"
-            on_press:
-                root.manager.current = 'game'
+#:import dp kivy.metrics.dp
 
-<Ship@Image>:
-    source: 'images/rocket.png'
+<Shot>:
     size_hint: None, None
-    size: dp(100), dp(300)
-    # size: dp(50), dp(50)
+    size: dp(6), dp(18)
+    canvas:
+        Color:
+            rgba: 1, 1, 0.3, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<PlayerShip>:
+    size_hint: None, None
+    size: dp(150), dp(150)
+    source: "assets/images/player_ship.png"
+
+<EnemyShip>:
+    size_hint: None, None
+    size: dp(64), dp(64)
+    source: "assets/images/enemy_ship.png"
+
+<Meteor>:
+    size_hint: None, None
+    source: "assets/images/meteor.png"
+
+<Boss>:
+    size_hint: None, None
+    size: dp(220), dp(150)
+    source: "assets/images/boss_ships.png"
+
+<BossBullet>:
+    size_hint: None, None
+    size: dp(16), dp(16)
+    canvas:
+        Color:
+            rgba: 1, 0.35, 0.15, 1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<MainScreen>:
+    MDFloatLayout:
+        FitImage:
+            source: "assets/images/cosmos.jpg"
+            size_hint: 1, 1
+
+        MDLabel:
+            text: "SPACE SHOOTER"
+            halign: "center"
+            font_style: "H4"
+            pos_hint: {"center_x": 0.5, "center_y": 0.65}
+
+        MDRaisedButton:
+            text: "PLAY"
+            pos_hint: {"center_x": 0.5, "center_y": 0.45}
+            on_release: app.sm.current = "game"
+
+<GameOverScreen>:
+    MDFloatLayout:
+        FitImage:
+            source: "assets/images/cosmos.jpg"
+            size_hint: 1, 1
+
+        MDLabel:
+            text: "GAME OVER"
+            halign: "center"
+            font_style: "H4"
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
+
+        MDRaisedButton:
+            text: "PLAY AGAIN"
+            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            on_release: app.sm.current = "game"
+
+<VictoryScreen>:
+    MDFloatLayout:
+        FitImage:
+            source: "assets/images/cosmos.jpg"
+            size_hint: 1, 1
+
+        MDLabel:
+            text: "ПЕРЕМОГА!"
+            halign: "center"
+            font_style: "H4"
+            pos_hint: {"center_x": 0.5, "center_y": 0.62}
+
+        MDLabel:
+            text: "Ви перемогли боса"
+            halign: "center"
+            font_style: "H6"
+            pos_hint: {"center_x": 0.5, "center_y": 0.53}
+
+        MDRaisedButton:
+            text: "ГРАТИ ЗНОВУ"
+            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            on_release: app.sm.current = "game"
 
 <GameScreen>:
-    FloatLayout:
-        FloatLayout:
-            id: game
-            FloatLayout:
-                id: back
-            FloatLayout:
-                id: front
-            Ship:
-                id: ship
-                center: root.center
+    MDFloatLayout:
+        # Фон з однієї картинки cosmos.jpg на весь екран
+        FitImage:
+            source: "assets/images/cosmos.jpg"
+            size_hint: 1, 1
 
-        FloatLayout:
-            id: interface
+    FloatLayout:
+        id: front
+
+        PlayerShip:
+            id: ship
+            y: dp(100)
+
+    # Смуга прогресу до появи боса / hp боса під час бою
+    MDProgressBar:
+        id: boss_meter
+        pos_hint: {"top": 0.995, "center_x": 0.5}
+        size_hint_x: 0.92
+        size_hint_y: None
+        height: dp(10)
+        value: 0
+        max: 100
+
+    # Текст-підказка "БИЙ БОСА!" під час вразливої фази
+    MDLabel:
+        id: boss_hint_label
+        text: ""
+        halign: "center"
+        font_style: "H4"
+        bold: True
+        theme_text_color: "Custom"
+        text_color: 1, 0.25, 0.2, 1
+        pos_hint: {"center_x": 0.5, "center_y": 0.75}
+        opacity: 0
+
+    # Пауза
+    MDIconButton:
+        icon: "pause"
+        pos_hint: {"right": 0.98, "top": 0.98}
+        on_release: root.show_menu()
+
+    # Екранні кнопки для керування у всі боки
+    MDIconButton:
+        icon: "arrow-left-bold-circle"
+        icon_size: "56sp"
+        pos_hint: {"x": 0.02, "y": 0.02}
+        on_press: root.pressKey("left")
+        on_release: root.releaseKey("left")
+
+    MDIconButton:
+        icon: "arrow-right-bold-circle"
+        icon_size: "56sp"
+        pos_hint: {"x": 0.18, "y": 0.02}
+        on_press: root.pressKey("right")
+        on_release: root.releaseKey("right")
+
+    MDIconButton:
+        icon: "arrow-up-bold-circle"
+        icon_size: "56sp"
+        pos_hint: {"x": 0.10, "y": 0.12}
+        on_press: root.pressKey("up")
+        on_release: root.releaseKey("up")
+
+    MDIconButton:
+        icon: "arrow-down-bold-circle"
+        icon_size: "56sp"
+        pos_hint: {"x": 0.10, "y": 0.02}
+        on_press: root.pressKey("down")
+        on_release: root.releaseKey("down")
+
+    # Кнопка пострілу
+    MDIconButton:
+        icon: "circle-slice-8"
+        icon_size: "56sp"
+        pos_hint: {"right": 0.98, "y": 0.02}
+        on_press: root.pressKey("shot")
+        on_release: root.releaseKey("shot")
